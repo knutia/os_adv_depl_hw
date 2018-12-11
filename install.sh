@@ -109,15 +109,19 @@ if ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbo
     oc new-project tasks-build --display-name="Tasks - Build"
 	
 	echo "Set serviceaccount status for CI/CD project for dev, stage and prod projects"
-    oc policy add-role-to-group edit system:serviceaccounts:cicd-dev -n tasks-dev
-    oc policy add-role-to-group edit system:serviceaccounts:cicd-dev -n tasks-test
-    oc policy add-role-to-group edit system:serviceaccounts:cicd-dev -n tasks-prod	
+	#oc policy add-role-to-group system:image-puller system:serviceaccounts:tasks-dev -n tasks-build
+    #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-dev
+    #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-test
+    #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-prod
+    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-dev
+    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-test
+    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-prod	
 	
 	echo "Start application deployment to trigger CI/CD workflow"
     oc new-app jenkins-persistent
     oc new-app -n tasks-build -f ./config/templates/cicd_template.yaml
 
-	echo "Sleep for 5 minutes  to allow to build cicd-dev"
+	echo "Sleep for 5 minutes  to allow to build tasks-build"
 	sleep 5m	
 
     #echo -- Setting up Jenkins --
@@ -189,7 +193,7 @@ if ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbo
 		}
 	}' | oc create -f - -n tasks-prod
 
-	oc set resources dc/tasks --requests=cpu=100m
+	oc set resources dc/tasks --requests=cpu=100m -n tasks-prod
 
 	oc autoscale dc/tasks --min 1 --max 5 --cpu-percent=80
 
