@@ -1,3 +1,3 @@
-ansible-playbook ./hosts /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
+ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
 ansible nodes -a "rm -rf /etc/origin"
 ansible nfs -a "rm -rf /srv/nfs/*"
