@@ -20,4 +20,5 @@ With the assumption that the infrastructure layer has been set up and configured
 4.	Execute below commands to start installation :
 
 	cd os_adv_depl_hw
+	
 	./install.sh
