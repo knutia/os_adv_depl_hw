@@ -97,32 +97,32 @@ if ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbo
     #oc new-project os-tasks-${GUID}-prod
 	
 	#echo "Create Tasks project"
-    oc new-project tasks-dev --display-name="Tasks - Dev"
+    #oc new-project tasks-dev --display-name="Tasks - Dev"
 
 	#echo "Create Stage project"
-    oc new-project tasks-test --display-name="Tasks - Test"
+    #oc new-project tasks-test --display-name="Tasks - Test"
 
 	#echo "Create Prod project"
-    oc new-project tasks-prod --display-name="Tasks - Prod"
+    #oc new-project tasks-prod --display-name="Tasks - Prod"
 
 	#echo "Create CI/CD project"
-    oc new-project tasks-build --display-name="Tasks - Build"
+    #oc new-project tasks-build --display-name="Tasks - Build"
 	
-	echo "Set serviceaccount status for CI/CD project for dev, stage and prod projects"
+	#echo "Set serviceaccount status for CI/CD project for dev, stage and prod projects"
 	#oc policy add-role-to-group system:image-puller system:serviceaccounts:tasks-dev -n tasks-build
     #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-dev
     #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-test
     #oc policy add-role-to-group edit system:serviceaccounts:tasks-build -n tasks-prod
-    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-dev
-    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-test
-    oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-prod	
+    #oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-dev
+    #oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-test
+    #oc policy add-role-to-user edit system:serviceaccount:tasks-build:jenkins -n tasks-prod	
 	
-	echo "Start application deployment to trigger CI/CD workflow"
-    oc new-app jenkins-persistent
-    oc new-app -n tasks-build -f ./config/templates/cicd_template.yaml
+	#echo "Start application deployment to trigger CI/CD workflow"
+    #oc new-app jenkins-persistent
+    #oc new-app -n tasks-build -f ./config/templates/cicd_template.yaml
 
-	echo "Sleep for 5 minutes  to allow to build tasks-build"
-	sleep 5m	
+	#echo "Sleep for 5 minutes  to allow to build tasks-build"
+	#sleep 5m	
 
     #echo -- Setting up Jenkins --
     #oc new-app jenkins-persistent -p ENABLE_OAUTH=true -e JENKINS_PASSWORD=jenkins -n os-tasks-${GUID}-dev
@@ -143,9 +143,15 @@ if ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbo
     #echo -- Verify Jenkins is up --
     #./config/bin/podLivenessCheck.sh jenkins os-tasks-${GUID}-dev 15
 
+	
+	echo -- Setting up CICD pipeline --
+	sh ./scripts/provision.sh --user andrew deploy
+	echo "Sleep for 5 minutes  to allow to build tasks-build"
+	sleep 5m
+	
     echo -- Running pipeline --
     #oc start-build os-pipeline -n os-tasks-${GUID}-dev
-	oc start-build tasks-pipeline
+	oc start-build tasks-pipeline -n tasks-build
 	sleep 10m
 
     echo -- Set up autoscaler --
@@ -195,7 +201,7 @@ if ansible-playbook -f 20 -i ./hosts /usr/share/ansible/openshift-ansible/playbo
 
 	oc set resources dc/tasks --requests=cpu=100m -n tasks-prod
 
-	oc autoscale dc/tasks --min 1 --max 5 --cpu-percent=80
+	oc autoscale dc/tasks --min 1 --max 5 --cpu-percent=80 -n tasks-prod
 
 	
     #oc autoscale dc/os-tasks --min 1 --max 10 --cpu-percent=80 -n os-tasks-${GUID}-prod

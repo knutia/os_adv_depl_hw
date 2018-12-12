@@ -191,9 +191,10 @@ objects:
               }
               stage('Promote to STAGE?') {
                 steps {
-                  timeout(time:1, unit:'MINUTES') {
-                      input message: "Promote to STAGE?", ok: "Promote"
-                  }
+                  # We are sopose to promote but if this times out, as ther is no human beeing ther to promote, ther will be no prod app to autoscale
+                  #timeout(time:1, unit:'MINUTES') {
+                  #    input message: "Promote to STAGE?", ok: "Promote"
+                  #}
 
                   script {
                     openshift.withCluster() {
@@ -223,9 +224,10 @@ objects:
               }
               stage('Promote to PROD?') {
                 steps {
-                  timeout(time:2, unit:'MINUTES') {
-                      input message: "Promote to PROD?", ok: "Promote"
-                  }
+                  # We are sopose to promote but if this times out, as ther is no human beeing ther to promote, ther will be no prod app to autoscale
+                  #timeout(time:2, unit:'MINUTES') {
+                  #    input message: "Promote to PROD?", ok: "Promote"
+                  #}
 
                   script {
                     openshift.withCluster() {
